@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// SystemdFormatter prepares logrus entries for output to systemd.
+// Formatter prepares logrus entries for output to systemd.
 // It maps:
 //   PanicLevel -> EMER(0)
 //   FatalLevel -> CRIT(2)
@@ -20,10 +20,10 @@ import (
 //   InfoLevel -> INFO(6)
 //   DebugLevel -> DEBUG(7)
 //   TraceLevel -> DEBUG(7)
-type SystemdFormatter struct{}
+type Formatter struct{}
 
 // Format formats entry to a systemd log line.
-func (f *SystemdFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	var level uint32 = 6 // default systemd lvl 6 "info"
 	switch entry.Level {
@@ -43,7 +43,11 @@ func (f *SystemdFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		level = debug
 	}
 
-	msg := fmt.Sprintf("%s %+v", entry.Message, entry.Data)
+	var msg string
+	for k, v := range entry.Data {
+		msg += fmt.Sprintf(" %s=%v", k, v)
+	}
+	msg = entry.Message + msg
 	msg = strings.ReplaceAll(msg, "\n", " ") // systemd log lines contain no newlines
 	return []byte(fmt.Sprintf("<%d>%s\n", level, msg)), nil
 }
