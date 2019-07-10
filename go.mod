@@ -1,4 +1,4 @@
-module github.com/quillaja/systemdfmt
+module github.com/quillaja/logrus-systemd-formatter
 
 go 1.12
 
